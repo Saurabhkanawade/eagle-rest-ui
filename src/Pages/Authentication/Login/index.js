@@ -4,15 +4,15 @@ import {
   Checkbox,
   Container,
   CssBaseline,
-  FormControl,
   FormControlLabel,
-  FormLabel,
   styled,
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
 import MuiCard from "@mui/material/Card";
+import React, { useEffect, useState } from "react";
+import Spinner from "../../Component/Spinner";
+import { PASSWORD, USER_NAME, USERNAME } from "../../../Constants/constant";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -38,11 +38,82 @@ function Login() {
   const [emailErrorMessage, setEmailErrorMessage] = useState();
   const [passwordError, setPasswordError] = useState();
   const [passwordErrorMessage, setPasswordErrorMessage] = useState();
-  const [open, setOpen] = useState();
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleSubmit = (event) => {};
+  useEffect(() => {
+    // Simulate an initial loading delay
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000); // Loader duration: 2 seconds
 
-  const validateInputs = () => {};
+    return () => clearTimeout(timer); // Cleanup timer
+  }, []);
+
+  // Show the loader until the app is ready
+  if (isLoading) {
+    return <Spinner />;
+  }
+
+  const handleSubmit = (event) => {
+    console.log("data");
+
+    event.preventDefault(); // Prevent form submission
+    if (emailError || passwordError) {
+      return;
+    }
+
+    const data = new FormData(event.currentTarget);
+    const email = data.get("email");
+    const password = data.get("password");
+
+    console.log(data);
+
+    // Check if email and password match "test"
+    if (email === USERNAME && password === PASSWORD) {
+      // Dummy token
+      const accessToken = "DUMMYACCESSTOKEN";
+
+      // Save token to localStorage
+      localStorage.setItem("accessToken", accessToken);
+
+      console.log("Login successful! Access Token:", accessToken);
+      alert("Login successful!");
+
+      // Redirect to dashboard or desired page
+      window.location.href = "/dashboard";
+    } else {
+      alert("Invalid username or password!");
+    }
+  };
+
+  const validateInputs = () => {
+    const email = document.getElementById("email");
+    const password = document.getElementById("password");
+
+    console.log("Login successful! Access Token:", email.value, password.value);
+    let isValid = true;
+
+    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
+      setEmailError(true);
+      setEmailErrorMessage("Please enter a valid email address.");
+      isValid = false;
+    } else {
+      setEmailError(false);
+      setEmailErrorMessage("");
+    }
+
+    if (!password.value || password.value.length < 6) {
+      setPasswordError(true);
+      setPasswordErrorMessage("Password must be at least 6 characters long.");
+      isValid = false;
+    } else {
+      setPasswordError(false);
+      setPasswordErrorMessage("");
+    }
+
+    return isValid;
+  };
+
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
@@ -57,24 +128,23 @@ function Login() {
       >
         <Card variant="outlined">
           <Typography sx={{ width: "100%" }} component="h1" variant="h4">
-            Login
+            Sign in
           </Typography>
 
           <Box
             component="form"
             onSubmit={handleSubmit}
-            sx={{
-              marginTop: "8px",
-            }}
+            sx={{ marginTop: "8px" }}
             noValidate
           >
             <TextField
               error={emailError}
               helperText={emailErrorMessage}
               id="email"
+              name="email" // Add the name attribute
               type="email"
               label="Email Address"
-              placeholder="your@email.com"
+              placeholder="eagle@email.com"
               variant="outlined"
               autoComplete="email"
               margin="normal"
@@ -88,6 +158,7 @@ function Login() {
               helperText={passwordErrorMessage}
               placeholder="••••••••••••"
               id="password"
+              name="password" // Add the name attribute
               label="Password"
               type="password"
               variant="outlined"
@@ -104,6 +175,7 @@ function Login() {
             <Button
               fullWidth
               variant="contained"
+              type="submit"
               sx={{ mt: 3, mb: 1 }}
               onClick={validateInputs}
             >
